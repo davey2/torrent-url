@@ -4,7 +4,7 @@ import axios from "axios";
 class TorrentURL {
 	private client: WebTorrent.Instance = new WebTorrent();
 
-	constructor(private indexURL = "http://localhost:8000/") {
+	constructor(private indexURL = "https://index.torrent-url.tk") {
 		axios.defaults.baseURL = this.indexURL;
 	}
 
