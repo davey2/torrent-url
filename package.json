@@ -1,0 +1,58 @@
+{
+	"name": "torrent-url",
+	"main": "dist/index.js",
+	"unpkg": "dist/bundle.js",
+	"types": "dist/index.d.ts",
+	"scripts": {
+		"prepare": "husky install",
+		"lint": "eslint src",
+		"format": "prettier --write",
+		"build:bundle": "browserify -p tsify -s TorrentURL src/index.ts > dist/bundle.js",
+		"build:tsc": "tsc -p .",
+		"build": "npm run build:tsc && npm run build:bundle"
+	},
+	"devDependencies": {
+		"@commitlint/cli": "^12.1.4",
+		"@commitlint/config-conventional": "^12.1.4",
+		"@types/webtorrent": "^0.109.1",
+		"@typescript-eslint/eslint-plugin": "^4.28.1",
+		"@typescript-eslint/parser": "^4.28.1",
+		"browserify": "^17.0.0",
+		"cz-conventional-changelog": "^3.3.0",
+		"eslint": "^7.30.0",
+		"husky": "^7.0.0",
+		"lint-staged": "^11.0.0",
+		"prettier": "2.3.2",
+		"semantic-release": "^17.4.4",
+		"tsify": "^5.0.4",
+		"typescript": "^4.3.5"
+	},
+	"lint-staged": {
+		"*.{js,json,yaml,md}": "npm run format",
+		"*.ts": [
+			"npm run format",
+			"npm run lint"
+		]
+	},
+	"dependencies": {
+		"axios": "^0.21.1",
+		"webtorrent": "^1.1.4"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/davey2/torrent-url.git"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"release": {
+		"branches": [
+			"main"
+		]
+	},
+	"config": {
+		"commitizen": {
+			"path": "./node_modules/cz-conventional-changelog"
+		}
+	}
+}
