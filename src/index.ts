@@ -24,20 +24,10 @@ class TorrentURL {
 
 						torrent.on("noPeers", announceType => {
 							console.log("noPeers", announceType);
-
-							// nincs peer a torrenthez
-							// ebben az esetben automatikusan a webseedekhez kellene fordulnia
 						});
 					});
 				})
 				.on("error", () => {
-					// error esetén valószínűleg nem létezik a torrent az indexben
-					// sima fetch-el le kell kérdezni az adatokat és elkezdeni seedelni
-					// a torrent file adatait beküldeni az indexnek
-					// és ellenőrizni, hogy a hash nincs-e már regisztrálva
-					// ha regisztrálva van hozzá adjuk az url-t
-					// ha nincs akkor felvisszük mint új torrent
-
 					fetch(url)
 						.then(response => {
 							resolve(response);
@@ -55,39 +45,6 @@ class TorrentURL {
 						.catch(reject);
 				});
 		});
-		/* return new Promise((resolve, reject) => {
-			axios
-				.get(`/${url}`)
-				.then(response => {
-					const hash: string = response.data;
-					console.log("add torrent...");
-					this.client.add(hash, { announce: this.trackers }, torrent => {
-						console.log("torrent added");
-						torrent.addWebSeed(url);
-						torrent.on("done", () => {
-							console.log("torrent done");
-							torrent.files[0].getBlob((error, blob) => {
-								if (error) reject(error);
-								else if (blob) resolve(new Response(blob));
-								else reject();
-							});
-						});
-
-						torrent.on("noPeers", () => {
-							reject();
-						});
-					});
-				})
-				.catch(() => {
-					fetch(url).then(response => {
-						resolve(response);
-
-						response.blob().then(blob => {
-							this.client.seed(<File>blob);
-						});
-					});
-				});
-		}); */
 	}
 
 	private registerTorrent(url: string, torrent: Buffer) {
