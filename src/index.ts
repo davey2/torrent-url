@@ -1,5 +1,6 @@
 import WebTorrent, { TorrentOptions, Torrent } from "webtorrent";
 import axios from "axios";
+import ParseTorrent from "parse-torrent";
 
 declare module "webtorrent" {
 	export interface Torrent {
@@ -36,24 +37,41 @@ class TorrentURL {
 					});
 				}
 			} else {
-				this.client
-					.add(`${this.indexURL}/${url}`, torrent => {
-						console.log("torrent added", torrent);
-
-						torrent.on("done", () => {
-							console.log("torrent done");
-							torrent.files[0].getBlob((error, blob) => {
-								if (error) reject(error);
-								else if (blob) resolve(new Response(blob));
-								else reject();
+				axios
+					.get(`/${url}`, {
+						transformResponse(response) {
+							return JSON.parse(response, (key, value) => {
+								if (value.type && value.type === "Buffer")
+									return Buffer.from(value.data);
+								else return value;
 							});
-
-							torrent.on("noPeers", announceType => {
-								console.log("noPeers", announceType);
-							});
-						});
+						}
 					})
-					.on("error", () => {
+					.then(response => {
+						// TypeError: parsed.created.getTime is not a function
+						response.data.created = new Date(response.data.created);
+						this.client.add(
+							ParseTorrent.toTorrentFile(response.data),
+							torrent => {
+								console.log("torrent added", torrent);
+
+								torrent.on("done", () => {
+									console.log("torrent done");
+									torrent.files[0].getBlob((error, blob) => {
+										if (error) reject(error);
+										else if (blob) resolve(new Response(blob));
+										else reject();
+									});
+
+									torrent.on("noPeers", announceType => {
+										console.log("noPeers", announceType);
+									});
+								});
+							}
+						);
+					})
+					.catch(error => {
+						console.log("ERROR", error);
 						fetch(url)
 							.then(response => {
 								resolve(response);
@@ -66,7 +84,7 @@ class TorrentURL {
 											urlList: [url]
 										},
 										torrent => {
-											this.registerTorrent(url, torrent.torrentFile);
+											axios.post("/", ParseTorrent(torrent.torrentFile));
 											console.log(torrent);
 										}
 									);
@@ -76,10 +94,6 @@ class TorrentURL {
 					});
 			}
 		});
-	}
-
-	private registerTorrent(url: string, torrent: Buffer) {
-		axios.post("/", { url, torrent });
 	}
 }
 

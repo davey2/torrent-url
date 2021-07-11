@@ -36,6 +36,7 @@
 	},
 	"dependencies": {
 		"axios": "^0.21.1",
+		"parse-torrent": "^9.1.3",
 		"webtorrent": "^1.1.4"
 	},
 	"repository": {
