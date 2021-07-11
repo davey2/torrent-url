@@ -40,11 +40,15 @@ class TorrentURL {
 				axios
 					.get(`/${url}`, {
 						transformResponse(response) {
-							return JSON.parse(response, (key, value) => {
-								if (value.type && value.type === "Buffer")
-									return Buffer.from(value.data);
-								else return value;
-							});
+							try {
+								return JSON.parse(response, (key, value) => {
+									if (value.type && value.type === "Buffer")
+										return Buffer.from(value.data);
+									else return value;
+								});
+							} catch (error) {
+								return response;
+							}
 						}
 					})
 					.then(response => {
