@@ -95,6 +95,21 @@ class TorrentURL {
 			}
 		});
 	}
+
+	// seed exist data from cache, localStorage, indexedDB etc...
+	seed(url: string, data: Blob): void {
+		this.client.seed(
+			<File>data,
+			<TorrentOptions>{
+				name: "webtorrent-url-fetch",
+				urlList: [url]
+			},
+			torrent => {
+				// check the torrent is registered in index
+				axios.post("/", ParseTorrent(torrent.torrentFile));
+			}
+		);
+	}
 }
 
 export = TorrentURL;
