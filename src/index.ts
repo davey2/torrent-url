@@ -80,13 +80,18 @@ class TorrentURL {
 							.then(response => {
 								resolve(response);
 
-								response.blob().then(blob => {
+								response.blob().then(async blob => {
+									const opts: { name: string; urlList?: string[] } = {
+										name: "webtorrent-url-fetch"
+									};
+
+									await this.testWebSeed(url).then(() => {
+										opts.urlList = [url];
+									});
+
 									this.client.seed(
 										<File>blob,
-										<TorrentOptions>{
-											name: "webtorrent-url-fetch",
-											urlList: [url]
-										},
+										<TorrentOptions>opts,
 										torrent => {
 											axios.post("/", ParseTorrent(torrent.torrentFile));
 											console.log(torrent);
@@ -101,18 +106,34 @@ class TorrentURL {
 	}
 
 	// seed exist data from cache, localStorage, indexedDB etc...
-	seed(url: string, data: Blob): void {
-		this.client.seed(
-			<File>data,
-			<TorrentOptions>{
-				name: "webtorrent-url-fetch",
-				urlList: [url]
-			},
-			torrent => {
-				// check the torrent is registered in index
-				axios.post("/", ParseTorrent(torrent.torrentFile));
-			}
-		);
+	async seed(url: string, data: Blob): Promise<void> {
+		const opts: { name: string; urlList?: string[] } = {
+			name: "webtorrent-url-fetch"
+		};
+
+		await this.testWebSeed(url).then(() => {
+			opts.urlList = [url];
+		});
+
+		this.client.seed(<File>data, <TorrentOptions>opts, torrent => {
+			// check the torrent is registered in index
+			axios.post("/", ParseTorrent(torrent.torrentFile));
+		});
+	}
+
+	private testWebSeed(url: string): Promise<void> {
+		return new Promise((resolve, reject) => {
+			fetch(url, { method: "HEAD", headers: { range: "bytes=0-127" } })
+				.then(response => {
+					if (
+						response.status === 206
+						/* && response.headers.get("content-length") === 128 */
+					) {
+						resolve();
+					} else reject();
+				})
+				.catch(reject);
+		});
 	}
 }
 
