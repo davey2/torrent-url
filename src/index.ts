@@ -11,8 +11,8 @@ declare module "webtorrent" {
 class TorrentURL {
 	private client: WebTorrent.Instance = new WebTorrent();
 
-	constructor(private indexURL = "https://index.torrent-url.tk") {
-		axios.defaults.baseURL = this.indexURL;
+	constructor({ indexURL = "https://index.torrent-url.tk" } = {}) {
+		axios.defaults.baseURL = indexURL;
 	}
 
 	fetch(url: string): Promise<Response> {
