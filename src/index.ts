@@ -8,7 +8,7 @@ declare module "webtorrent" {
 	}
 }
 
-class TorrentURL {
+class WebTorrentFetch {
 	private client: WebTorrent.Instance = new WebTorrent();
 	private createTorrent: boolean;
 	private autoFetch: boolean;
@@ -151,4 +151,4 @@ class TorrentURL {
 	}
 }
 
-export = TorrentURL;
+export = WebTorrentFetch;
