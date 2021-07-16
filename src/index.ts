@@ -12,6 +12,7 @@ class TorrentURL {
 	private client: WebTorrent.Instance = new WebTorrent();
 	private createTorrent: boolean;
 	private autoFetch: boolean;
+	private readonly NEW_TORRENT_NAME: string = "webtorrent-fetch";
 
 	constructor({
 		indexURL = "https://index.webtorrent-fetch.tk",
@@ -93,7 +94,7 @@ class TorrentURL {
 									if (this.createTorrent) {
 										response.blob().then(async blob => {
 											const opts: { name: string; urlList?: string[] } = {
-												name: "webtorrent-url-fetch"
+												name: this.NEW_TORRENT_NAME
 											};
 
 											await this.testWebSeed(url).then(() => {
@@ -121,7 +122,7 @@ class TorrentURL {
 	// seed exist data from cache, localStorage, indexedDB etc...
 	async seed(url: string, data: Blob): Promise<void> {
 		const opts: { name: string; urlList?: string[] } = {
-			name: "webtorrent-url-fetch"
+			name: this.NEW_TORRENT_NAME
 		};
 
 		await this.testWebSeed(url).then(() => {
