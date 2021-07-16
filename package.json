@@ -1,5 +1,5 @@
 {
-	"name": "torrent-url",
+	"name": "webtorrent-fetch",
 	"main": "dist/index.js",
 	"unpkg": "dist/bundle.js",
 	"types": "dist/index.d.ts",
@@ -7,7 +7,7 @@
 		"prepare": "husky install",
 		"lint": "eslint src",
 		"format": "prettier --write",
-		"build:bundle": "browserify -p tsify -s TorrentURL src/index.ts > dist/bundle.js",
+		"build:bundle": "browserify -p tsify -s WebTorrentFetch src/index.ts > dist/bundle.js",
 		"build:tsc": "tsc -p .",
 		"build": "npm run build:tsc && npm run build:bundle"
 	},

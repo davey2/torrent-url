@@ -14,7 +14,7 @@ class TorrentURL {
 	private autoFetch: boolean;
 
 	constructor({
-		indexURL = "https://index.torrent-url.tk",
+		indexURL = "https://index.webtorrent-fetch.tk",
 		autoFetch = true, // fetch automatically the url when not exist in index
 		createTorrent = true // create torrent when url is not exist in index (this is only works if the autoFetch is enabled)
 	} = {}) {
