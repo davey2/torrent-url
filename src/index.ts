@@ -10,9 +10,17 @@ declare module "webtorrent" {
 
 class TorrentURL {
 	private client: WebTorrent.Instance = new WebTorrent();
+	private createTorrent: boolean;
+	private autoFetch: boolean;
 
-	constructor({ indexURL = "https://index.torrent-url.tk" } = {}) {
+	constructor({
+		indexURL = "https://index.torrent-url.tk",
+		autoFetch = true, // fetch automatically the url when not exist in index
+		createTorrent = true // create torrent when url is not exist in index (this is only works if the autoFetch is enabled)
+	} = {}) {
 		axios.defaults.baseURL = indexURL;
+		this.createTorrent = createTorrent;
+		this.autoFetch = autoFetch;
 	}
 
 	fetch(url: string): Promise<Response> {
@@ -76,30 +84,35 @@ class TorrentURL {
 					})
 					.catch(error => {
 						console.log("ERROR", error);
-						fetch(url)
-							.then(response => {
-								resolve(response);
 
-								response.blob().then(async blob => {
-									const opts: { name: string; urlList?: string[] } = {
-										name: "webtorrent-url-fetch"
-									};
+						if (this.autoFetch) {
+							fetch(url)
+								.then(response => {
+									resolve(response);
 
-									await this.testWebSeed(url).then(() => {
-										opts.urlList = [url];
-									});
+									if (this.createTorrent) {
+										response.blob().then(async blob => {
+											const opts: { name: string; urlList?: string[] } = {
+												name: "webtorrent-url-fetch"
+											};
 
-									this.client.seed(
-										<File>blob,
-										<TorrentOptions>opts,
-										torrent => {
-											axios.post("/", ParseTorrent(torrent.torrentFile));
-											console.log(torrent);
-										}
-									);
-								});
-							})
-							.catch(reject);
+											await this.testWebSeed(url).then(() => {
+												opts.urlList = [url];
+											});
+
+											this.client.seed(
+												<File>blob,
+												<TorrentOptions>opts,
+												torrent => {
+													axios.post("/", ParseTorrent(torrent.torrentFile));
+													console.log(torrent);
+												}
+											);
+										});
+									}
+								})
+								.catch(reject);
+						} else reject();
 					});
 			}
 		});
