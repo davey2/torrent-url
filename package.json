@@ -7,7 +7,7 @@
 		"prepare": "husky install",
 		"lint": "eslint src",
 		"format": "prettier --write",
-		"build:bundle": "browserify -p tsify -s WebTorrentFetch src/index.ts > dist/bundle.js",
+		"build:bundle": "browserify -p tsify -s WebTorrentFetch src/index.ts | uglifyjs > dist/bundle.js",
 		"build:tsc": "tsc -p .",
 		"build": "npm run build:tsc && npm run build:bundle"
 	},
@@ -25,7 +25,8 @@
 		"prettier": "2.3.2",
 		"semantic-release": "^17.4.4",
 		"tsify": "^5.0.4",
-		"typescript": "^4.3.5"
+		"typescript": "^4.3.5",
+		"uglify-js": "^3.13.10"
 	},
 	"lint-staged": {
 		"*.{js,json,yaml,md}": "npm run format",
