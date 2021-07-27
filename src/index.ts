@@ -1,6 +1,6 @@
 import WebTorrent, { TorrentOptions, Torrent } from "webtorrent";
-import axios from "axios";
 import ParseTorrent from "parse-torrent";
+import TorrentIndex from "./TorrentIndex";
 
 declare module "webtorrent" {
 	interface Torrent {
@@ -12,6 +12,7 @@ class WebTorrentFetch {
 	private client: WebTorrent.Instance = new WebTorrent();
 	private createTorrent: boolean;
 	private autoFetch: boolean;
+	private index: TorrentIndex;
 	private readonly NEW_TORRENT_NAME: string = "webtorrent-fetch";
 
 	constructor({
@@ -22,6 +23,7 @@ class WebTorrentFetch {
 		axios.defaults.baseURL = indexURL;
 		this.createTorrent = createTorrent;
 		this.autoFetch = autoFetch;
+		this.index = new TorrentIndex(indexURL);
 	}
 
 	fetch(url: string): Promise<Response> {
@@ -105,7 +107,7 @@ class WebTorrentFetch {
 												<File>blob,
 												<TorrentOptions>opts,
 												torrent => {
-													axios.post("/", ParseTorrent(torrent.torrentFile));
+													this.index.createTorrent(torrent.torrentFile);
 													console.log(torrent);
 												}
 											);
@@ -131,7 +133,7 @@ class WebTorrentFetch {
 
 		this.client.seed(<File>data, <TorrentOptions>opts, torrent => {
 			// check the torrent is registered in index
-			axios.post("/", ParseTorrent(torrent.torrentFile));
+			this.index.createTorrent(torrent.torrentFile);
 		});
 	}
 
