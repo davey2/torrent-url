@@ -3,7 +3,7 @@ import axios from "axios";
 import ParseTorrent from "parse-torrent";
 
 declare module "webtorrent" {
-	export interface Torrent {
+	interface Torrent {
 		urlList: string[];
 	}
 }
