@@ -20,7 +20,6 @@ class WebTorrentFetch {
 		autoFetch = true, // fetch automatically the url when not exist in index
 		createTorrent = true // create torrent when url is not exist in index (this is only works if the autoFetch is enabled)
 	} = {}) {
-		axios.defaults.baseURL = indexURL;
 		this.createTorrent = createTorrent;
 		this.autoFetch = autoFetch;
 		this.index = new TorrentIndex(indexURL);
@@ -48,46 +47,27 @@ class WebTorrentFetch {
 					});
 				}
 			} else {
-				axios
-					.get(`/${url}`, {
-						transformResponse(response) {
-							try {
-								return JSON.parse(response, (key, value) => {
-									if (value.type && value.type === "Buffer")
-										return Buffer.from(value.data);
-									else return value;
+				this.index
+					.getTorrent(url)
+					.then(torrentFile => {
+						this.client.add(torrentFile, torrent => {
+							console.log("torrent added", torrent);
+
+							torrent.on("done", () => {
+								console.log("torrent done");
+								torrent.files[0].getBlob((error, blob) => {
+									if (error) reject(error);
+									else if (blob) resolve(new Response(blob));
+									else reject();
 								});
-							} catch (error) {
-								return response;
-							}
-						}
-					})
-					.then(response => {
-						// TypeError: parsed.created.getTime is not a function
-						response.data.created = new Date(response.data.created);
-						this.client.add(
-							ParseTorrent.toTorrentFile(response.data),
-							torrent => {
-								console.log("torrent added", torrent);
 
-								torrent.on("done", () => {
-									console.log("torrent done");
-									torrent.files[0].getBlob((error, blob) => {
-										if (error) reject(error);
-										else if (blob) resolve(new Response(blob));
-										else reject();
-									});
-
-									torrent.on("noPeers", announceType => {
-										console.log("noPeers", announceType);
-									});
+								torrent.on("noPeers", announceType => {
+									console.log("noPeers", announceType);
 								});
-							}
-						);
+							});
+						});
 					})
-					.catch(error => {
-						console.log("ERROR", error);
-
+					.catch(() => {
 						if (this.autoFetch) {
 							fetch(url)
 								.then(response => {
