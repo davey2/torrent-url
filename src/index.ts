@@ -73,22 +73,7 @@ class WebTorrentFetch {
 
 									if (this.createTorrent) {
 										response.blob().then(async blob => {
-											const opts: { name: string; urlList?: string[] } = {
-												name: this.NEW_TORRENT_NAME
-											};
-
-											await this.testWebSeed(url).then(() => {
-												opts.urlList = [url];
-											});
-
-											this.client.seed(
-												<File>blob,
-												<TorrentOptions>opts,
-												torrent => {
-													this.index.createTorrent(torrent.torrentFile);
-													console.log(torrent);
-												}
-											);
+											await this.seedTorrent(url, <File>blob);
 										});
 									}
 								})
@@ -96,6 +81,21 @@ class WebTorrentFetch {
 						} else reject();
 					});
 			}
+		});
+	}
+
+	private async seedTorrent(url: string, file: File) {
+		const opts: { name: string; urlList?: string[] } = {
+			name: this.NEW_TORRENT_NAME
+		};
+
+		await this.testWebSeed(url).then(() => {
+			opts.urlList = [url];
+		});
+
+		this.client.seed(file, <TorrentOptions>opts, torrent => {
+			this.index.createTorrent(torrent.torrentFile);
+			console.log(torrent);
 		});
 	}
 
