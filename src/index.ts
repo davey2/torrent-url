@@ -24,11 +24,18 @@ class WebTorrentFetch {
 		this.index = new TorrentIndex(indexURL);
 	}
 
+	private findTorrentByURL(url: string): Torrent | undefined {
+		const torrent: Torrent | undefined = this.client.torrents.find(
+			({ urlList }) => urlList.some(item => item === url)
+		);
+
+		return torrent;
+	}
+
 	public fetch(url: string): Promise<Response> {
 		return new Promise((resolve, reject) => {
-			const torrent: Torrent | undefined = this.client.torrents.find(
-				({ urlList }) => urlList.some(item => item === url)
-			);
+			const torrent: Torrent | undefined = this.findTorrentByURL(url);
+
 			if (torrent) {
 				if (torrent.done) {
 					torrent.files[0].getBlob((error, blob) => {
