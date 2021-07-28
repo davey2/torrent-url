@@ -34,7 +34,11 @@ class WebTorrentFetch {
 
 	private torrentToResponse(torrent: Torrent): Promise<Response> {
 		return new Promise((resolve, reject) => {
-			this.torrentToResponse(torrent).then(resolve).catch(reject);
+			torrent.files[0].getBlob((error, blob) => {
+				if (error) reject(error);
+				else if (blob) resolve(new Response(blob));
+				else reject();
+			});
 		});
 	}
 
@@ -102,11 +106,7 @@ class WebTorrentFetch {
 
 				torrent.on("done", () => {
 					console.log("torrent done");
-					torrent.files[0].getBlob((error, blob) => {
-						if (error) reject(error);
-						else if (blob) resolve(new Response(blob));
-						else reject();
-					});
+					this.torrentToResponse(torrent).then(resolve).catch(reject);
 
 					torrent.on("noPeers", announceType => {
 						console.log("noPeers", announceType);
