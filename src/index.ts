@@ -24,7 +24,7 @@ class WebTorrentFetch {
 		this.index = new TorrentIndex(indexURL);
 	}
 
-	fetch(url: string): Promise<Response> {
+	public fetch(url: string): Promise<Response> {
 		return new Promise((resolve, reject) => {
 			const torrent: Torrent | undefined = this.client.torrents.find(
 				({ urlList }) => urlList.some(item => item === url)
@@ -48,23 +48,13 @@ class WebTorrentFetch {
 			} else {
 				this.index
 					.getTorrent(url)
-					.then(torrentFile => {
-						this.client.add(torrentFile, torrent => {
-							console.log("torrent added", torrent);
-
-							torrent.on("done", () => {
-								console.log("torrent done");
-								torrent.files[0].getBlob((error, blob) => {
-									if (error) reject(error);
-									else if (blob) resolve(new Response(blob));
-									else reject();
-								});
-
-								torrent.on("noPeers", announceType => {
-									console.log("noPeers", announceType);
-								});
-							});
-						});
+					.then(async torrentFile => {
+						try {
+							const response: Response = await this.seedTorrent(torrentFile);
+							resolve(response);
+						} catch (error) {
+							reject(error);
+						}
 					})
 					.catch(() => {
 						if (this.autoFetch) {
@@ -100,8 +90,29 @@ class WebTorrentFetch {
 		});
 	}
 
+	private seedTorrent(torrentFile: Buffer): Promise<Response> {
+		return new Promise((resolve, reject) => {
+			this.client.add(torrentFile, torrent => {
+				console.log("torrent added", torrent);
+
+				torrent.on("done", () => {
+					console.log("torrent done");
+					torrent.files[0].getBlob((error, blob) => {
+						if (error) reject(error);
+						else if (blob) resolve(new Response(blob));
+						else reject();
+					});
+
+					torrent.on("noPeers", announceType => {
+						console.log("noPeers", announceType);
+					});
+				});
+			});
+		});
+	}
+
 	// seed exist data from cache, localStorage, indexedDB etc...
-	async seed(url: string, data: Blob): Promise<void> {
+	public async seed(url: string, data: Blob): Promise<void> {
 		const opts: { name: string; urlList?: string[] } = {
 			name: this.NEW_TORRENT_NAME
 		};
