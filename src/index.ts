@@ -59,7 +59,7 @@ class WebTorrentFetch {
 					.getTorrent(url)
 					.then(async torrentFile => {
 						try {
-							const response: Response = await this.seedTorrent(torrentFile);
+							const response: Response = await this.addTorrent(torrentFile);
 							resolve(response);
 						} catch (error) {
 							reject(error);
@@ -99,7 +99,7 @@ class WebTorrentFetch {
 		});
 	}
 
-	private seedTorrent(torrentFile: Buffer): Promise<Response> {
+	private addTorrent(torrentFile: Buffer): Promise<Response> {
 		return new Promise((resolve, reject) => {
 			this.client.add(torrentFile, torrent => {
 				console.log("torrent added", torrent);
