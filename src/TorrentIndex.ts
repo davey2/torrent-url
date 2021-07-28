@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosResponse } from "axios";
+import axios, { AxiosInstance } from "axios";
 import ParseTorrent from "parse-torrent";
 
 export default class TorrentIndex {

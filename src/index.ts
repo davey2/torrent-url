@@ -1,5 +1,4 @@
 import WebTorrent, { TorrentOptions, Torrent } from "webtorrent";
-import ParseTorrent from "parse-torrent";
 import TorrentIndex from "./TorrentIndex";
 
 declare module "webtorrent" {
