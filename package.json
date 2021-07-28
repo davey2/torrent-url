@@ -29,10 +29,10 @@
 		"uglify-js": "^3.13.10"
 	},
 	"lint-staged": {
-		"*.{js,json,yaml,md}": "npm run format",
+		"*.{js,json,yaml,md}": "prettier --write",
 		"*.ts": [
-			"npm run format",
-			"npm run lint"
+			"prettier --write",
+			"eslint"
 		]
 	},
 	"dependencies": {
