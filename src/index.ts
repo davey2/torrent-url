@@ -32,24 +32,22 @@ class WebTorrentFetch {
 		return torrent;
 	}
 
+	private torrentToResponse(torrent: Torrent): Promise<Response> {
+		return new Promise((resolve, reject) => {
+			this.torrentToResponse(torrent).then(resolve).catch(reject);
+		});
+	}
+
 	public fetch(url: string): Promise<Response> {
 		return new Promise((resolve, reject) => {
 			const torrent: Torrent | undefined = this.findTorrentByURL(url);
 
 			if (torrent) {
 				if (torrent.done) {
-					torrent.files[0].getBlob((error, blob) => {
-						if (error) reject(error);
-						else if (blob) resolve(new Response(blob));
-						else reject();
-					});
+					this.torrentToResponse(torrent).then(resolve).catch(reject);
 				} else {
 					torrent.on("done", () => {
-						torrent.files[0].getBlob((error, blob) => {
-							if (error) reject(error);
-							else if (blob) resolve(new Response(blob));
-							else reject();
-						});
+						this.torrentToResponse(torrent).then(resolve).catch(reject);
 					});
 				}
 			} else {
