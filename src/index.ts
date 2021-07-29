@@ -73,7 +73,7 @@ class WebTorrentFetch {
 
 									if (this.createTorrent) {
 										response.blob().then(async blob => {
-											await this.seedTorrent(url, <File>blob);
+											await this.seed(url, <File>blob);
 										});
 									}
 								})
@@ -81,21 +81,6 @@ class WebTorrentFetch {
 						} else reject();
 					});
 			}
-		});
-	}
-
-	private async seedTorrent(url: string, file: File) {
-		const opts: { name: string; urlList?: string[] } = {
-			name: this.NEW_TORRENT_NAME
-		};
-
-		await this.testWebSeed(url).then(() => {
-			opts.urlList = [url];
-		});
-
-		this.client.seed(file, <TorrentOptions>opts, torrent => {
-			this.index.createTorrent(torrent.torrentFile);
-			console.log(torrent);
 		});
 	}
 
@@ -117,7 +102,7 @@ class WebTorrentFetch {
 	}
 
 	// seed exist data from cache, localStorage, indexedDB etc...
-	public async seed(url: string, data: Blob): Promise<void> {
+	public async seed(url: string, file: File): Promise<void> {
 		const opts: { name: string; urlList?: string[] } = {
 			name: this.NEW_TORRENT_NAME
 		};
@@ -126,7 +111,7 @@ class WebTorrentFetch {
 			opts.urlList = [url];
 		});
 
-		this.client.seed(<File>data, <TorrentOptions>opts, torrent => {
+		this.client.seed(file, <TorrentOptions>opts, torrent => {
 			// check the torrent is registered in index
 			this.index.createTorrent(torrent.torrentFile);
 		});
